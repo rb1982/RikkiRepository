@@ -22,7 +22,6 @@ public class MyRestController {
 			Thread.sleep(sleepTime);
 			System.out.println("Processing done at " + LocalDateTime.now());
 		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		return "Random number generated is " + Math.random() + " on PORT " + env.getProperty("local.server.port");
