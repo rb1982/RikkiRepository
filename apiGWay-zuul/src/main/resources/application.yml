@@ -1,0 +1,31 @@
+spring:
+  application:
+    name: RB-API-GATEWAY-ZUUL
+server:
+  port: 8762
+
+eureka:
+  client: 
+    serviceUrl:
+      defaultZone: http://rvi:8763/eureka/,http://rv2:8764/eureka/
+    registerWithEureka: true
+    fetchRegistry: true      
+  instance:
+    preferIpAddress: true
+              
+zuul:
+  routes:
+    microservices-1:
+      path: /rb/** #optional - this is here for illustration only that microservice-1 can also be accessed using URI /rb
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: '*'
+
+ribbon:
+  ReadTimeout: 30000
+  SocketTimeout: 30000
+
+  

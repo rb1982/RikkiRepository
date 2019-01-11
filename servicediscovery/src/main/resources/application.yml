@@ -1,0 +1,18 @@
+spring:
+  application:
+    name: netflix-eureka-naming-server
+eureka:
+  client:
+    registerWithEureka: true
+    fetchRegistry: true
+    healthcheck:
+      enabled: true
+management:
+  security:
+    enabled: false
+  endpoints:
+    web:
+      exposure:
+        include: '*'
+
+   
