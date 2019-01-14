@@ -1,10 +1,18 @@
 spring:
   application:
-    name: netflix-eureka-naming-server
+    name: eureka-service-registry
+
+server:
+  port: ${eureka.port:8761}
+      
 eureka:
+  instance:
+    hostname: ${eureka.host}
   client:
-    registerWithEureka: true
-    fetchRegistry: true
+    registerWithEureka: ${clustered:true}
+    fetchRegistry: ${clustered:true}
+    serviceUrl:
+      defaultZone: ${replica.url:http://localhost:${server.port}/eureka/}
     healthcheck:
       enabled: true
 management:
@@ -14,5 +22,3 @@ management:
     web:
       exposure:
         include: '*'
-
-   

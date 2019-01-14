@@ -1,13 +1,13 @@
 spring:
   application:
-    name: RB-API-GATEWAY-ZUUL
+    name: zuul-api-gateway
 server:
-  port: 8762
+  port: ${zuul.port:7777}
 
 eureka:
   client: 
     serviceUrl:
-      defaultZone: http://rvi:8763/eureka/,http://rv2:8764/eureka/
+      defaultZone: ${registry.url:http://localhost:8761/eureka/}
     registerWithEureka: true
     fetchRegistry: true      
   instance:
