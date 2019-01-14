@@ -1,0 +1,17 @@
+server:
+  port: 8282
+spring:
+  cloud:
+    config:
+      server:
+        git:
+          uri: file:///C:/rb-home/mygit-config/
+
+management:
+  security:
+    enabled: false
+  endpoints:
+    web:
+      basePath: /manage
+      exposure:
+        include: '*'            

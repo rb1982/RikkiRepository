@@ -3,6 +3,8 @@ package com.poc.microservices;
 import java.time.LocalDateTime;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.core.env.Environment;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -10,6 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 
 @RestController
+@RefreshScope
 public class MyRestController implements MyRestAPIs {
 	
 	@Autowired
@@ -19,8 +22,13 @@ public class MyRestController implements MyRestAPIs {
 	@Autowired
 	private MyRestAPIs2 myApis2;
 	
+	
+	@Value("${hello.world}")
+	private String greetMessage;
+	
 	public String getGreeting() {
-		return "Hello World from port " + env.getProperty("local.server.port");
+		
+		return greetMessage +  " ---> Hello World from port " + env.getProperty("local.server.port");
 	}
 	
 	public String getTime() {
