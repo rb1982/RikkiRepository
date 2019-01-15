@@ -5,7 +5,7 @@ spring:
     config:
       server:
         git:
-          uri: file:///C:/rb-home/mygit-config/
+          uri: https://github.com/rb1982/ConfigRepository.git
 
 management:
   security:

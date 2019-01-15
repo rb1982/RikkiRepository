@@ -3,4 +3,5 @@ spring:
     name: microservices-2
   cloud:
     config:
-      uri: http://localhost:8282
+      uri: ${config.server.uri:http://localhost:8282}
+      requestReadTimeout: 60000
