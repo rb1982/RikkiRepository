@@ -7,5 +7,6 @@ PROJECTS DESCRIPTION
 2. microservices: Sample Micro services that calls another microservice in project "microservices2". Also contains client side Load Balancing (Ribbon) and Fault Tolerant/Resilient capabilities (Hystrix)
 3. microservices2: Sample Micro service
 4. servicediscovery: Contains Service Discovery - Eureka
+5. configserver: Contains Spring cloud config server for externalization application configuration properties
 
 *** END GROUP 1 ***
