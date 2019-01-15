@@ -1,18 +1,44 @@
-version: "2"
+version: "2.1"
 
+networks:
+  network1:
+  
 services:
+
+  config-server1:
+    build:
+      context: ./configserver
+    image: configserver:1.0.0
+    container_name: configserver1
+    ports:
+      - "8282:8282"
+    networks:
+      - network1
+    healthcheck:
+        test: ["CMD", "curl", "-f", "http://configserver1:8282/microservices-1/local"]
+        interval: 30s
+        timeout: 30s
+        retries: 5      
+
   eureka-peer1:
     build:
       context: ./servicediscovery
     image: servicediscovery:1.0.0
     container_name: eureka1
     environment:
-      - JAVA_OPTS=-Deureka.host=eureka1 -Deureka.port=8761 -Dreplica.url=http://eureka2:8762/eureka/,http://eureka3:8763/eureka/
-#      - LOGGING_LEVEL_COM_NETFLIX_DISCOVERY=DEBUG
+      - JAVA_OPTS=-Deureka.host=eureka1 -Dreplica.url=http://eureka2:8761/eureka/
     ports:
       - "8761:8761"
     networks:
-      - network-poc
+      - network1
+    depends_on:
+      config-server1:
+         condition: service_healthy
+    healthcheck:
+        test: ["CMD", "curl", "-f", "http://eureka1:8761/"]
+        interval: 30s
+        timeout: 30s
+        retries: 5         
 
   eureka-peer2:
     build:
@@ -20,62 +46,67 @@ services:
     image: servicediscovery:1.0.0
     container_name: eureka2
     environment:
-      - JAVA_OPTS=-Deureka.host=eureka2 -Deureka.port=8762 -Dreplica.url=http://eureka1:8761/eureka/,http://eureka3:8763/eureka/
-#      - LOGGING_LEVEL_COM_NETFLIX_DISCOVERY=DEBUG
+      - JAVA_OPTS=-Deureka.host=eureka2 -Dreplica.url=http://eureka1:8761/eureka/
     ports:
-      - "8762:8762"
+      - "8762:8761"
     networks:
-      - network-poc
-      
-  eureka-peer3:
-    build:
-      context: ./servicediscovery
-    image: servicediscovery:1.0.0
-    container_name: eureka3
-    environment:
-      - JAVA_OPTS=-Deureka.host=eureka3 -Deureka.port=8763 -Dreplica.url=http://eureka1:8761/eureka/,http://eureka2:8762/eureka/
-#      - LOGGING_LEVEL_COM_NETFLIX_DISCOVERY=DEBUG
-    ports:
-      - "8763:8763"
-    networks:
-      - network-poc      
-
+      - network1
+    depends_on:
+      eureka-peer1:
+         condition: service_healthy         
+    healthcheck:
+        test: ["CMD", "curl", "-f", "http://eureka2:8761/"]
+        interval: 30s
+        timeout: 30s
+        retries: 5 
+  
   microservices-1:
     build:
       context: ./microservices
     image: microservices:1.0.0
     container_name: microservices
     environment:
-      - JAVA_OPTS=-Dport=2267 -Dregistry.url=http://eureka1:8761/eureka/,http://eureka2:8762/eureka/,http://eureka3:8763/eureka/
-#    ports:
-#      - "2267:2267" Access will be through gateway only.
+      - JAVA_OPTS=-Dspring.profiles.active=local -Dconfig.server.uri=http://configserver1:8282 -Dregistry.url=http://eureka1:8761/eureka/,http://eureka2:8761/eureka/
     networks:
-      - network-poc
-      
+      - network1
+    depends_on:
+      microservices-2:
+         condition: service_healthy
+    healthcheck:
+        test: ["CMD", "curl", "-f", "http://microservices:2267/greet"]
+        interval: 30s
+        timeout: 30s
+        retries: 5          
+  
   microservices-2:
     build:
       context: ./microservices2
     image: microservices2:1.0.0
     container_name: microservices2
     environment:
-      - JAVA_OPTS=-Dport=2268 -Dregistry.url=http://eureka1:8761/eureka/,http://eureka2:8762/eureka/,http://eureka3:8763/eureka/
-#    ports:
-#      - "2268:2268" This is internally used by microservices-1, so we dont want to expose it outside container. Anyways access is through gateway only
+      - JAVA_OPTS=-Dspring.profiles.active=local -Dconfig.server.uri=http://configserver1:8282 -Dregistry.url=http://eureka1:8761/eureka/,http://eureka2:8761/eureka/
     networks:
-      - network-poc
+      - network1
+    depends_on:
+      eureka-peer2:
+         condition: service_healthy
+    healthcheck:
+        test: ["CMD", "curl", "-f", "http://microservices2:2268/random"]
+        interval: 30s
+        timeout: 30s
+        retries: 5
 
-  api-gateway-zuul:
+  api-gateway:
     build:
       context: ./apiGWay-zuul
     image: api-gateway-zuul:1.0.0
-    container_name: apiGWay-zuul
+    container_name: api-gateway-zuul1
     environment:
-      - JAVA_OPTS=-Dport=7777 -Dregistry.url=http://eureka1:8761/eureka/,http://eureka2:8762/eureka/,http://eureka3:8763/eureka/
+      - JAVA_OPTS=-Dspring.profiles.active=local -Dconfig.server.uri=http://configserver1:8282 -Dregistry.url=http://eureka1:8761/eureka/,http://eureka2:8761/eureka/
     ports:
       - "80:7777"
     networks:
-      - network-poc
-
-      
-networks:
-  network-poc:
+      - network1
+    depends_on:
+      microservices-1:
+         condition: service_healthy 
