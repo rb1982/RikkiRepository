@@ -10,8 +10,8 @@ services:
       context: ./configserver
     image: configserver:1.0.0
     container_name: configserver1
-#    ports:
-#      - "8282:8282"
+    ports:
+      - "8282:8282"
     networks:
       - network1
     healthcheck:
@@ -26,7 +26,7 @@ services:
     image: servicediscovery:1.0.0
     container_name: eureka1
     environment:
-      - JAVA_OPTS=-Deureka.host=eureka1 -Dreplica.url=http://eureka2:8761/eureka/
+      - JAVA_OPTS=-Dspring.profiles.active=local -Dconfig.server.uri=http://configserver1:8282 -Deureka.host=eureka1 -Dreplica.url=http://eureka2:8761/eureka/
     ports:
       - "8761:8761"
     networks:
@@ -46,7 +46,7 @@ services:
     image: servicediscovery:1.0.0
     container_name: eureka2
     environment:
-      - JAVA_OPTS=-Deureka.host=eureka2 -Dreplica.url=http://eureka1:8761/eureka/
+      - JAVA_OPTS=-Dspring.profiles.active=local -Dconfig.server.uri=http://configserver1:8282 -Deureka.host=eureka2 -Dreplica.url=http://eureka1:8761/eureka/
     ports:
       - "8762:8761"
     networks:
