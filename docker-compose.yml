@@ -5,6 +5,18 @@ networks:
   
 services:
 
+  rabbitmq:
+    container_name: rabbitmqhost
+    image: rabbitmq:management
+    environment:
+        - RABBITMQ_DEFAULT_USER=guest
+        - RABBITMQ_DEFAULT_PASS=guest
+    ports:
+        - "5672:5672"
+        - "15672:15672"
+    networks:
+      - network1
+      
   config-server1:
     build:
       context: ./configserver
@@ -14,6 +26,8 @@ services:
       - "8282:8282"
     networks:
       - network1
+    depends_on:
+      - rabbitmq
     healthcheck:
         test: ["CMD", "curl", "-f", "http://configserver1:8282/manage/health"]
         interval: 30s
