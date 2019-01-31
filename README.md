@@ -14,21 +14,21 @@ RUNNING THE APP
 ---------------
 
 Steps: 
-  a) Docker must be installed and have working knowledge
-  b) Maven installed (3.6.0 or later)
-  c) JDK 11
-  d) Clone repository to your local directory (say REPO_HOME)
-  e) CD to REPO_HOME
-  f) Execute: mvn clean package
-  g) Ensure docker is UP & Running
+  1) Docker must be installed and have working knowledge
+  2) Maven installed (3.6.0 or later)
+  3) JDK 11
+  4) Clone repository to your local directory (say REPO_HOME)
+  5) CD to REPO_HOME
+  6) Execute: mvn clean package
+  7) Ensure docker is UP & Running
 
-OPTION 1: If you wish to use EUREKA for service discovery
-  h) Execute: docker-compose up --build
-OPTION 2: If you wish to use CONSUL for service discovery
-  h) Download CONSUL and RUN in dev mode using following command
+OPTION EUREKA: If you wish to use EUREKA for service discovery
+  8) Execute: docker-compose up --build
+OPTION CONSUL: If you wish to use CONSUL for service discovery
+  8) Download CONSUL and RUN in dev mode using following command
      consul agent -dev -client=<IP_OF_YOUR_MACHINE>
-  i) Edit docker-compose-consul.yml to set <IP_OF_YOUR_MACHINE>
-  j) Execute: docker-compose -f docker-compose-consul.yml up --build
+  9) Edit docker-compose-consul.yml to set <IP_OF_YOUR_MACHINE>
+  10) Execute: docker-compose -f docker-compose-consul.yml up --build
   
 TESTING
 -------
