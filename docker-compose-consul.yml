@@ -1,0 +1,97 @@
+version: "2.1"
+
+networks:
+  network1:
+  
+services:
+
+  rabbitmq:
+    container_name: rabbitmqhost
+    image: rabbitmq:management
+    environment:
+        - RABBITMQ_DEFAULT_USER=guest
+        - RABBITMQ_DEFAULT_PASS=guest
+    ports:
+        - "5672:5672"
+        - "15672:15672"
+    networks:
+      - network1
+      
+  config-server1:
+    build:
+      context: ./configserver
+    image: configserver:1.0.0
+    container_name: configserver1
+    ports:
+      - "8282:8282"
+    networks:
+      - network1
+    depends_on:
+      - rabbitmq
+    healthcheck:
+        test: ["CMD", "curl", "-f", "http://configserver1:8282/manage/health"]
+        interval: 30s
+        timeout: 30s
+        retries: 5      
+
+  microservices-2:
+    build:
+      context: ./microservices2
+    image: microservices2:1.0.0
+    container_name: microservices2
+    environment:
+      - JAVA_OPTS=-Dspring.profiles.active=consul -Dconfig.server.uri=http://configserver1:8282
+    ports:
+        - "2268:2268" #forwarding port else consul wont be able to do health check
+    networks:
+      - network1
+    depends_on:
+      config-server1:
+         condition: service_healthy
+    healthcheck:
+        test: ["CMD", "curl", "-f", "http://microservices2:2268/manage/health"]
+        interval: 30s
+        timeout: 30s
+        retries: 5
+
+  microservices-1:
+    build:
+      context: ./microservices
+    image: microservices:1.0.0
+    container_name: microservices
+    environment:
+      - JAVA_OPTS=-Dspring.profiles.active=consul -Dconfig.server.uri=http://configserver1:8282
+    ports:
+        - "2267:2267" #forwarding port else consul wont be able to do health check
+    networks:
+      - network1
+    depends_on:
+      microservices-2:
+         condition: service_healthy
+    healthcheck:
+        test: ["CMD", "curl", "-f", "http://microservices:2267/manage/health"]
+        interval: 30s
+        timeout: 30s
+        retries: 5  
+
+  api-gateway:
+    build:
+      context: ./apiGWay-zuul
+    image: api-gateway-zuul:1.0.0
+    container_name: api-gateway-zuul1
+    environment:
+      - JAVA_OPTS=-Dspring.profiles.active=consul -Dconfig.server.uri=http://configserver1:8282
+    ports:
+      - "80:7777" #for client
+      - "7777:7777" #for consul to do health check
+    networks:
+      - network1
+    depends_on:
+      microservices-1:
+         condition: service_healthy 
+    healthcheck:
+        test: ["CMD", "curl", "-f", "http://api-gateway-zuul1:7777/manage/health"]
+        interval: 30s
+        timeout: 30s
+        retries: 5
+        
