@@ -9,8 +9,8 @@ services:
     container_name: rabbitmqhost
     image: rabbitmq:management
     environment:
-        - RABBITMQ_DEFAULT_USER=guest
-        - RABBITMQ_DEFAULT_PASS=guest
+        - RABBITMQ_DEFAULT_USER=${RABBITMQ_USER}
+        - RABBITMQ_DEFAULT_PASS=${RABBITMQ_PASS}
     ports:
         - "5672:5672"
         - "15672:15672"
@@ -29,7 +29,7 @@ services:
     depends_on:
       - rabbitmq
     healthcheck:
-        test: ["CMD", "curl", "-f", "http://configserver1:8282/manage/health"]
+        test: ["CMD", "curl", "-f", "${CONFIG_SERVER_URI}/manage/health"]
         interval: 30s
         timeout: 30s
         retries: 5      
@@ -40,7 +40,7 @@ services:
     image: microservices2:1.0.0
     container_name: microservices2
     environment:
-      - JAVA_OPTS=-Dspring.profiles.active=consul -Dconfig.server.uri=http://configserver1:8282
+      - JAVA_OPTS=-Dspring.profiles.active=${PROFILE_CONSUL} -Dconfig.server.uri=${CONFIG_SERVER_URI} -Dconsulhost=${CONSUL_HOST}
     ports:
         - "2268:2268" #forwarding port else consul wont be able to do health check
     networks:
@@ -60,7 +60,7 @@ services:
     image: microservices:1.0.0
     container_name: microservices
     environment:
-      - JAVA_OPTS=-Dspring.profiles.active=consul -Dconfig.server.uri=http://configserver1:8282
+      - JAVA_OPTS=-Dspring.profiles.active=${PROFILE_CONSUL} -Dconfig.server.uri=${CONFIG_SERVER_URI} -Dconsulhost=${CONSUL_HOST}
     ports:
         - "2267:2267" #forwarding port else consul wont be able to do health check
     networks:
@@ -80,7 +80,7 @@ services:
     image: api-gateway-zuul:1.0.0
     container_name: api-gateway-zuul1
     environment:
-      - JAVA_OPTS=-Dspring.profiles.active=consul -Dconfig.server.uri=http://configserver1:8282
+      - JAVA_OPTS=-Dspring.profiles.active=${PROFILE_CONSUL} -Dconfig.server.uri=${CONFIG_SERVER_URI} -Dconsulhost=${CONSUL_HOST}
     ports:
       - "80:7777" #for client
       - "7777:7777" #for consul to do health check

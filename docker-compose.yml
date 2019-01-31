@@ -9,8 +9,8 @@ services:
     container_name: rabbitmqhost
     image: rabbitmq:management
     environment:
-        - RABBITMQ_DEFAULT_USER=guest
-        - RABBITMQ_DEFAULT_PASS=guest
+        - RABBITMQ_DEFAULT_USER=${RABBITMQ_USER}
+        - RABBITMQ_DEFAULT_PASS=${RABBITMQ_PASS}
     ports:
         - "5672:5672"
         - "15672:15672"
@@ -29,7 +29,7 @@ services:
     depends_on:
       - rabbitmq
     healthcheck:
-        test: ["CMD", "curl", "-f", "http://configserver1:8282/manage/health"]
+        test: ["CMD", "curl", "-f", "${CONFIG_SERVER_URI}/manage/health"]
         interval: 30s
         timeout: 30s
         retries: 5      
@@ -40,7 +40,7 @@ services:
     image: servicediscovery:1.0.0
     container_name: eureka1
     environment:
-      - JAVA_OPTS=-Dspring.profiles.active=local -Dconfig.server.uri=http://configserver1:8282 -Deureka.host=eureka1 -Dreplica.url=http://eureka2:8761/eureka/
+      - JAVA_OPTS=-Dspring.profiles.active=${PROFILE_EUREKA} -Dconfig.server.uri=${CONFIG_SERVER_URI} -Deureka.host=eureka1 -Dreplica.url=http://eureka2:8761/eureka/
     ports:
       - "8761:8761"
     networks:
@@ -60,7 +60,7 @@ services:
     image: servicediscovery:1.0.0
     container_name: eureka2
     environment:
-      - JAVA_OPTS=-Dspring.profiles.active=local -Dconfig.server.uri=http://configserver1:8282 -Deureka.host=eureka2 -Dreplica.url=http://eureka1:8761/eureka/
+      - JAVA_OPTS=-Dspring.profiles.active=${PROFILE_EUREKA} -Dconfig.server.uri=${CONFIG_SERVER_URI} -Deureka.host=eureka2 -Dreplica.url=http://eureka1:8761/eureka/
     ports:
       - "8762:8761"
     networks:
@@ -80,7 +80,7 @@ services:
     image: microservices:1.0.0
     container_name: microservices
     environment:
-      - JAVA_OPTS=-Dspring.profiles.active=local -Dconfig.server.uri=http://configserver1:8282 -Dregistry.url=http://eureka1:8761/eureka/,http://eureka2:8761/eureka/
+      - JAVA_OPTS=-Dspring.profiles.active=${PROFILE_EUREKA} -Dconfig.server.uri=${CONFIG_SERVER_URI} -Dregistry.url=${REGISTRY_URL_EUREKA}
     networks:
       - network1
     depends_on:
@@ -98,7 +98,7 @@ services:
     image: microservices2:1.0.0
     container_name: microservices2
     environment:
-      - JAVA_OPTS=-Dspring.profiles.active=local -Dconfig.server.uri=http://configserver1:8282 -Dregistry.url=http://eureka1:8761/eureka/,http://eureka2:8761/eureka/
+      - JAVA_OPTS=-Dspring.profiles.active=${PROFILE_EUREKA} -Dconfig.server.uri=${CONFIG_SERVER_URI} -Dregistry.url=${REGISTRY_URL_EUREKA}
     networks:
       - network1
     depends_on:
@@ -116,7 +116,7 @@ services:
     image: api-gateway-zuul:1.0.0
     container_name: api-gateway-zuul1
     environment:
-      - JAVA_OPTS=-Dspring.profiles.active=local -Dconfig.server.uri=http://configserver1:8282 -Dregistry.url=http://eureka1:8761/eureka/,http://eureka2:8761/eureka/
+      - JAVA_OPTS=-Dspring.profiles.active=${PROFILE_EUREKA} -Dconfig.server.uri=${CONFIG_SERVER_URI} -Dregistry.url=${REGISTRY_URL_EUREKA}
     ports:
       - "80:7777"
     networks:
