@@ -30,7 +30,10 @@ Steps:
   
      consul agent -dev -client=<IP_OF_YOUR_MACHINE>
      
-  11. Edit docker-compose-consul.yml to set <IP_OF_YOUR_MACHINE>
+  11. Edit .env file to set <IP_OF_YOUR_MACHINE>
+  
+    consulhost=<IP_OF_YOUR_MACHINE>
+    
   10. Execute: docker-compose -f docker-compose-consul.yml up --build
   
 TESTING
