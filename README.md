@@ -28,11 +28,11 @@ Steps:
   9. You are done with EUREKA setup - ignore below steps i.e. 10 onwards.
   10. Download CONSUL and RUN in dev mode using following command
   
-     consul agent -dev -client=<IP_OF_YOUR_MACHINE>
+      consul agent -dev -client=<IP_OF_YOUR_MACHINE>
      
   11. Edit .env file to set <IP_OF_YOUR_MACHINE>
   
-    consulhost=<IP_OF_YOUR_MACHINE>
+      CONSUL_HOST=<IP_OF_YOUR_MACHINE>
     
   10. Execute: docker-compose -f docker-compose-consul.yml up --build
   
