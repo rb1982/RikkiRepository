@@ -22,7 +22,7 @@ Steps:
   6) Execute: mvn clean package
   7) Ensure docker is UP & Running
 
-OPTION EUREKA: If you wish to use EUREKA for service discovery
+<p>OPTION EUREKA: If you wish to use EUREKA for service discovery
   8) Execute: docker-compose up --build
 OPTION CONSUL: If you wish to use CONSUL for service discovery
   8) Download CONSUL and RUN in dev mode using following command
