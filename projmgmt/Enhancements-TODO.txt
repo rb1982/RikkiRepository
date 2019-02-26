@@ -1,0 +1,5 @@
+Enhancements in tool
+
+3. RULES:
+	If Enhancement
+		Requirement, Code, Code Review, UT, UT Review must be charged.
