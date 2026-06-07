@@ -128,7 +128,7 @@ jobs:
               name: "AI Review",
               head_sha: $sha,
               status: "completed",
-              conclusion: "success",
+              conclusion: "neutral",
               output: {
                 title: "AI Code Review",
                 summary: "Automated AI review completed",
