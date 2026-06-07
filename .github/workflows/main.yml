@@ -1,10 +1,10 @@
 name: AI Reviewer
 on:
   workflow_dispatch: 
-  inputs:
-    pr_number:
-      description: "Pull Request Number"
-      required: true
+    inputs:
+      pr_number:
+        description: "Pull Request Number"
+        required: true
 jobs:
   ai_review:
     name: AI PR Review
