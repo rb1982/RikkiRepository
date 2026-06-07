@@ -11,5 +11,4 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Show PR number
-        run: echo "Reviewing PR # ${{github.event.inputs.pr_number}}"
-    
+        run: echo "Reviewing PR#${{inputs.pr_number}}"
