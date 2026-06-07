@@ -1,4 +1,4 @@
-package com;
+package com.poc;
 /*
 This is just a test file to validate AI PR Review workflow github action.
 */
