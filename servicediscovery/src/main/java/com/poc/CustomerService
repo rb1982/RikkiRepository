@@ -1,0 +1,30 @@
+package com;
+/*
+This is just a test file to validate AI PR Review workflow github action.
+*/
+public class CustomerService {
+
+    public String getCustomerName(String customerId) {
+
+        String name = null;
+
+        // Null pointer issue
+        if(customerId.equals("123")) {
+            name = "Rikki";
+        }
+
+        // Possible NPE
+        return name.toUpperCase();
+    }
+
+    public void processCustomer() {
+
+        // Hardcoded value
+        String password = "admin123";
+
+        // Duplicate logic candidate
+        System.out.println("Processing customer");
+        System.out.println("Processing customer");
+        System.out.println("Processing customer");
+    }
+}
