@@ -125,12 +125,12 @@ jobs:
             --arg review "$REVIEW" \
             --arg sha "$HEAD_SHA" \
             '{
-              name: "AI Review",
+              name: "Rikki AI Review",
               head_sha: $sha,
               status: "completed",
               conclusion: "neutral",
               output: {
-                title: "AI Code Review",
+                title: "Rikki AI Code Review",
                 summary: "Automated AI review completed",
                 text: $review
               }
