@@ -7,7 +7,7 @@ on:
         required: true
 jobs:
   ai_review:
-    name: AI PR Review
+    name: Test
     runs-on: ubuntu-latest
     steps:
       - name: Show PR number
