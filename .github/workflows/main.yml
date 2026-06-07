@@ -1,11 +1,15 @@
 name: AI Reviewer
 on:
   workflow_dispatch: 
+  inputs:
+    pr_number:
+      description: "Pull Request Number"
+      required: true
 jobs:
   ai_review:
     name: AI PR Review
     runs-on: ubuntu-latest
     steps:
-      - name: Initialize
-        run: echo "AI Review is running"
+      - name: Show PR number
+        run: echo "Reviewing PR # ${{github.event.inputs.pr_number}"
     
