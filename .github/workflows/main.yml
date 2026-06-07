@@ -1,22 +1,111 @@
 name: AI Reviewer
+
 on:
-  workflow_dispatch: 
+  workflow_dispatch:
     inputs:
       pr_number:
         description: "Pull Request Number"
         required: true
+        type: string
+
 jobs:
   ai_review:
     name: AI PR Review
     runs-on: ubuntu-latest
+
     steps:
-      - name: Get PR Details
+
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Fetch PR Details
         run: |
-          echo "Fetching PR#${{inputs.pr_number}}"
+          echo "Fetching PR #${{ inputs.pr_number }}"
+
           response=$(curl -s \
             -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
             -H "Accept: application/vnd.github+json" \
             https://api.github.com/repos/${{ github.repository }}/pulls/${{ inputs.pr_number }})
-          echo "PR Number: $(echo "$response" | jq -r '.number')"
-          echo "Title: $(echo "$response" | jq -r '.title')"
-          echo "State: $(echo "$response" | jq -r '.state')"
+
+          prNumber=$(echo "$response" | jq -r '.number')
+          title=$(echo "$response" | jq -r '.title')
+          state=$(echo "$response" | jq -r '.state')
+
+          echo "PR Number: $prNumber"
+          echo "Title: $title"
+          echo "State: $state"
+
+      - name: Fetch Changed Files
+        run: |
+          files=$(curl -s \
+            -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+            -H "Accept: application/vnd.github+json" \
+            https://api.github.com/repos/${{ github.repository }}/pulls/${{ inputs.pr_number }}/files)
+
+          echo "$files" | jq -r '.[].filename' > changed_files.txt
+
+          echo "Changed Files:"
+          cat changed_files.txt
+
+      - name: Build Review Payload
+        run: |
+          > review_input.txt
+
+          while read file
+          do
+            if [ -f "$file" ]; then
+
+              echo "" >> review_input.txt
+              echo "====================================" >> review_input.txt
+              echo "FILE: $file" >> review_input.txt
+              echo "====================================" >> review_input.txt
+
+              cat "$file" >> review_input.txt
+
+            fi
+          done < changed_files.txt
+
+          echo "Review payload created"
+
+          echo "Preview:"
+          head -50 review_input.txt
+
+      - name: Call Groq
+        env:
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+        run: |
+
+          PROMPT=$(cat review_input.txt)
+
+          jq -n \
+            --arg prompt "$PROMPT" \
+            '{
+              model: "llama-3.3-70b-versatile",
+              messages: [
+                {
+                  role: "system",
+                  content: "You are a senior Java code reviewer. Review the supplied code and identify bugs, null pointer risks, security issues, maintainability concerns and code smells. Return findings grouped into HIGH, MEDIUM and LOW severity."
+                },
+                {
+                  role: "user",
+                  content: $prompt
+                }
+              ]
+            }' > request.json
+
+          echo "Calling Groq..."
+
+          curl -s \
+            https://api.groq.com/openai/v1/chat/completions \
+            -H "Authorization: Bearer $GROQ_API_KEY" \
+            -H "Content-Type: application/json" \
+            -d @request.json \
+            > response.json
+
+          echo ""
+          echo "================ AI REVIEW ================"
+
+          cat response.json | jq -r '.choices[0].message.content'
+
+          echo ""
+          echo "==========================================="
