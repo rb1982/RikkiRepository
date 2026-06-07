@@ -1,5 +1,8 @@
 name: AI Reviewer
 
+permissions:
+  checks: write
+
 on:
   workflow_dispatch:
     inputs:
@@ -26,13 +29,16 @@ jobs:
           title=$(echo "$response" | jq -r '.title')
           state=$(echo "$response" | jq -r '.state')
           headBranch=$(echo "$response" | jq -r '.head.ref')
+          headSha=$(echo "$response" | jq -r '.head.sha')
 
           echo "PR Number: $prNumber"
           echo "Title: $title"
           echo "State: $state"
           echo "Head Branch: $headBranch"
+          echo "Head SHA: $headSha"
 
           echo "HEAD_BRANCH=$headBranch" >> $GITHUB_ENV
+          echo "HEAD_SHA=$headSha" >> $GITHUB_ENV
 
       - name: Checkout PR Branch
         uses: actions/checkout@v4
@@ -50,15 +56,6 @@ jobs:
 
           echo "Changed Files:"
           cat changed_files.txt
-
-      - name: Debug Checkout
-        run: |
-          echo "Current Branch:"
-          git branch
-
-          echo ""
-          echo "Files in Repository:"
-          find .
 
       - name: Build Review Payload
         run: |
@@ -81,12 +78,7 @@ jobs:
 
           done < changed_files.txt
 
-          echo ""
           echo "Review payload created"
-          echo ""
-
-          echo "Preview:"
-          head -100 review_input.txt
 
       - name: Call Groq
         env:
@@ -111,8 +103,6 @@ jobs:
               ]
             }' > request.json
 
-          echo "Calling Groq..."
-
           curl -s \
             https://api.groq.com/openai/v1/chat/completions \
             -H "Authorization: Bearer $GROQ_API_KEY" \
@@ -120,10 +110,35 @@ jobs:
             -d @request.json \
             > response.json
 
-          echo ""
+          cat response.json | jq -r '.choices[0].message.content' > review_output.txt
+
           echo "================ AI REVIEW ================"
-
-          cat response.json | jq -r '.choices[0].message.content'
-
-          echo ""
+          cat review_output.txt
           echo "==========================================="
+
+      - name: Publish GitHub Check
+        run: |
+
+          REVIEW=$(cat review_output.txt)
+
+          jq -n \
+            --arg review "$REVIEW" \
+            --arg sha "$HEAD_SHA" \
+            '{
+              name: "AI Review",
+              head_sha: $sha,
+              status: "completed",
+              conclusion: "success",
+              output: {
+                title: "AI Code Review",
+                summary: "Automated AI review completed",
+                text: $review
+              }
+            }' > check.json
+
+          curl -s \
+            -X POST \
+            -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+            -H "Accept: application/vnd.github+json" \
+            https://api.github.com/repos/${{ github.repository }}/check-runs \
+            -d @check.json
