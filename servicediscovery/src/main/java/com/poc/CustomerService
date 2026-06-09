@@ -1,6 +1,6 @@
 package com.poc;
 /*
-This is just a test file to validate AI PR Review workflow github action.
+This is just a test file to validate AI PR Review workflow github action. This intentionally contains code review comments.
 */
 public class CustomerService {
 
